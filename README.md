@@ -104,7 +104,7 @@ The framework uses [Apache Airflow](https://airflow.apache.org/) for the workflo
 RDS/ECS will take about 10 minutes to launch. We'll use this time to walk through the Snowflake SQL and the Airflow DAGs used to automate it.
 
 1. Snowflake SQL Example
-    - Open the file located at `airflow/dags/sql/copy_source_nyc_taxi_raw.sql`
+    - Open the file located at `airflow/dags/sql/copy_raw_nyc_taxi.sql.sql`
     - This COPY command loads data from S3 into a Snowflake tables.
     - Metadata attributes such as `filename` and `file_row_number` are captured automatically. 
     - We also store the create process name and timestamp.
@@ -113,21 +113,21 @@ RDS/ECS will take about 10 minutes to launch. We'll use this time to walk throug
     copy into nyc_taxi_raw(vendorid, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, trip_distance, 
         pickup_longitude, pickup_latitude, ratecodeid, store_and_fwd_flag, pulocationid, dolocationid, payment_type, 
         fare_amount, extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, total_amount, src_filename, 
-        src_file_row_num, create_process, create_ts
+        src_file_row_num, create_process, create_ts    
     )
     from (
-      select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16,t.$17,t.$18,t.$19,
-      metadata$filename,
-      metadata$file_row_number,
-      'Airflow snowflake_source Dag',
-      convert_timezone('UTC' , current_timestamp )::timestamp_ntz
-      from @quickstart/nyc-taxi-data/ t
+    select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6,t.$7,t.$8,t.$9,t.$10,t.$11,t.$12,t.$13,t.$14,t.$15,t.$16,t.$17,t.$18,t.$19,
+    metadata$filename,
+    metadata$file_row_number,
+    'Airflow snowflake_raw Dag',
+    convert_timezone('UTC' , current_timestamp )::timestamp_ntz
+    from @quickstart/nyc-taxi-data/ t
     )
     file_format= (format_name = csv);
     ```
 
 2. Airflow DAG Example
-    - Open the file `airflow/dags/snowflake_source.py`
+    - Open the file `airflow/dags/snowflake_raw.py`
     - Airflow DAGs are written in Python
     - This DAG file constructs a pipeline for loading datasets from S3 into Snowflake
     - A sequential workflow is shown here for demonstration purposes. We can also run tasks in parallel.
@@ -153,27 +153,27 @@ RDS/ECS will take about 10 minutes to launch. We'll use this time to walk throug
     }
 
     dag = DAG(
-        'snowflake_source',
+        'snowflake_raw',
         default_args=default_args,
-        description='Snowflake source pipeline',
+        description='Snowflake raw pipeline',
         schedule_interval='0 */6 * * *',
     )
 
     t1 = SnowflakeOperator(
-        task_id='copy_source_airline_raw',
-        sql='sql/copy_source_airline_raw.sql',
+        task_id='copy_raw_airline',
+        sql='sql/copy_raw_airline.sql',
         snowflake_conn_id='snowflake_default',
         warehouse='load_wh',
-        database='source',
+        database='raw',
         autocommit=True,
         dag=dag)
 
     t2 = SnowflakeOperator(
-        task_id='copy_source_nyc_taxi_raw',
-        sql='sql/copy_source_nyc_taxi_rawql',
+        task_id='copy_raw_nyc_taxi',
+        sql='sql/copy_raw_nyc_taxi.sql',
         snowflake_conn_id='snowflake_default',
         warehouse='load_wh',
-        database='source',
+        database='raw',
         autocommit=True,
         dag=dag)
 
