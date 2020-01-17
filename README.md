@@ -49,16 +49,16 @@ Open the `setup_framework.sql` script in the Snowflake UI. Let's review the scri
 3. Log out of your account by selecting the drop down menu on the top right of the window.
 ![alt text](images/image-04.png)
 
-### Deploy the Source Database Objects
+### Deploy the Snowflake Database Objects
 
 Log into Snowflake with the `snowflake_user` account and the default password specified in the script.
-Open the `deploy_source.sql` script in the Snowflake UI. We'll take a walk through the script and describe what it is doing and why. Then we'll instruct them how to run it in one shot.
+Open the `deploy_objects.sql` script in the Snowflake UI. We'll take a walk through the script and describe what it is doing and why. Then we'll instruct them how to run it in one shot.
 
 1. Log back in to Snowflake with the following credentials:
     - User Name: `snowflake_user`
     - Password: `__CHANGE__`
 2. You will immediately be promted to change your password. Enter the password you retrieved in Step 4 of the `AWS Setup` section and click Finish. You are now logged in to the same Snowflake account as a different user.
-3. Copy the contents of the `deploy_source.sql` script (located in the `snowflake` directory) and paste in the Snowflake query editor window.
+3. Copy the contents of the `deploy_objects.sql` script (located in the `snowflake` directory) and paste in the Snowflake query editor window.
 4. Highlight the query text and click on the blue Run button at the top left of the query editor window to run the script. This will create two stage tables, a file format, and two tables that we'll be loading data from S3 into.
 ![alt text](images/image-08.png)
 5. We're now done with the initial Snowflake framework setup. Next, we'll be provisioning infrastructure in AWS that will allow us to run Airflow jobs to load these Snowflake tables with data.
@@ -183,11 +183,11 @@ RDS/ECS will take about 10 minutes to launch. We'll use this time to walk throug
 
 ### Run the Pipeline
 
-Launch Airflow on ECS Task public IP port 8080. Run the Source pipeline to load Source tables. Run Analytics pipeline to load Analytics tables. This will take some time to load. Go back to Snowflake and see the History tab, you can see Snowflake running the jobs and loading data. When it's done, Airflow UI will report success. We know it will since we've run this a billion times. Run a quick SQL query to see the data in the tables `query_analytics.sql`. Hey that's cool but we can do so much more, with Tableau Desktop!
+Launch Airflow on ECS Task public IP port 8080. Run the Raw pipeline to load the Raw tables. Run the Analytics pipeline to load the Analytics tables. This will take some time to load. Go back to Snowflake and see the History tab, you can see Snowflake running the jobs and loading data. When it's done, Airflow UI will report success. We know it will since we've run this a billion times. Run a quick SQL query to see the data in the tables `query_analytics.sql`. Hey that's cool but we can do so much more, with Tableau Desktop!
 
-1. In the Airflow UI, you should see two DAGs, `snowflake_analytics` and `snowflake_source`. Toggle the `snowflake_source` switch to On and select the Trigger Dag button in the Links section of the DAG row. When prompted to run the DAG, click OK.
+1. In the Airflow UI, you should see two DAGs, `snowflake_analytics` and `snowflake_raw`. Toggle the `snowflake_raw` switch to On and select the Trigger Dag button in the Links section of the DAG row. When prompted to run the DAG, click OK.
 ![alt text](images/image-23.png)
-2. The `snowflake_source` DAG is now running and loading data into Snowflake. Navigate back to Snowflake and click on the History button. You should see the progress of the queries that are being executed by Airflow.
+2. The `snowflake_raw` DAG is now running and loading data into Snowflake. Navigate back to Snowflake and click on the History button. You should see the progress of the queries that are being executed by Airflow.
 ![alt text](images/image-24.png)
 3. After a few minutes, the DAG should be complete. Back in Snowflake, run a quick query on the `public.airline_raw` table to confirm that data was loaded successfully.
 ![alt text](images/image-26.png) 
