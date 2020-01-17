@@ -18,7 +18,7 @@ The AWS Dev Day application demonstrates how to automate a Snowflake analytics p
 
 ### Download the Code
 
-Download the Dev Day code [here](https://snowflake-lab.s3-us-west-2.amazonaws.com/public/docs/slalom-aws-devday-2019-app.zip) and save to a location on your disk you can refer to later.
+Download the Dev Day code [here](https://github.com/SlalomBuild/snowflake-on-ecs/archive/release-0.1.tar.gz) and save to a location on your disk you can refer to later.
 
 ### Log into AWS
 
